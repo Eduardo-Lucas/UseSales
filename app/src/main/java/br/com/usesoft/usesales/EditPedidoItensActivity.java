@@ -5,24 +5,29 @@ import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.FilterQueryProvider;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -64,7 +69,17 @@ public class EditPedidoItensActivity extends Activity
     private BigDecimal precoFinalAcumulado = BigDecimal.valueOf(0.00);
     private int quantidadeItens = 0;
     // Campos Globais
-    private TextView mCodigoEmpresa, mNomeEmpresa, mCodigoUsuario, mNomeUsuario, mCodigoCliente, mNomeCliente;
+    private TextView mCodigoEmpresa, mNomeEmpresa, mCodigoUsuario, mNomeUsuario, mCodigoCliente,
+            mNomeCliente, mNumeroPedido;
+
+    // Campos do CursorAdapter
+    private TextView codigoProdutoRow, precoUnitarioRow, quantidadeRow, descontoRow;
+    // Campos do ListView
+    String codigoProdutoLV , precoUnitarioLV, quantidadeLV, descontoLV;
+    // Campos do Pedido
+    private TextView mCodigoFormaPagamento, mDescricaoFormaPagamento, mCodigoPrazoPagamento,
+            mDescricaoPrazoPagamento;
+
     // Campos AutoComplete
     // O campo nomeCliente deixou de ser AutoComplete pois, com o codigo informado, aparece o nome.
     private SimpleCursorAdapter mAdapter0; // (AutoCompleteTextView) Produtod
@@ -73,7 +88,7 @@ public class EditPedidoItensActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_edit_pedidositens);
+        setContentView(R.layout.edit_pedidositens);
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
@@ -101,7 +116,6 @@ public class EditPedidoItensActivity extends Activity
         final int codigoUsuario = globalVariables.getUsuario_id();
         final String nomeUsuario = globalVariables.getNomeUsuario();
 
-
         mCodigoEmpresa = (TextView) findViewById(R.id.codigoEmpresa_tv);
         mNomeEmpresa = (TextView) findViewById(R.id.nomeEmpresa_tv);
         mCodigoUsuario = (TextView) findViewById(R.id.codigoRepresentante_tv);
@@ -111,6 +125,10 @@ public class EditPedidoItensActivity extends Activity
         mValorTotalPedido = (TextView) findViewById(R.id.valorTotalPedido_tv);
         mquantidadeItens = (TextView) findViewById(R.id.quantidadeItens_tv);
         mEstoqueProduto = (TextView) findViewById(R.id.estoqueProduto_tv);
+
+        mNumeroPedido = (TextView)findViewById(R.id.numeroPedido_tv);
+        mCodigoFormaPagamento = (TextView) findViewById(R.id.codigoFormaPagamento_tv);
+        mCodigoPrazoPagamento = (TextView) findViewById(R.id.codigoPrazoPagamento_tv);
 
         mCodigoEmpresa.setText(String.valueOf(codigoEmpresa));
         mNomeEmpresa.setText(nomeEmpresa);
@@ -125,17 +143,21 @@ public class EditPedidoItensActivity extends Activity
 
         // INÍCIO - Pega as informaçoes do Corpo do Pedido
         Intent intent = getIntent();
-        final String iTipoPedido = intent.getStringExtra(PedidosColumns.PEDIDOS_TIPO_PEDIDO);
-        final String iCodigoCliente = intent.getStringExtra(ClientesColumns.CLIENTES_CODIGO);
-        String iRazaoSocialCliente = intent.getStringExtra(ClientesColumns.CLIENTES_RAZAO_SOCIAL);
-        final int iFormaPagamento = Integer.parseInt(intent.getStringExtra(PedidosColumns.PEDIDOS_FORMAPAGAMENTO));
-        final int iPrazoPagamento = Integer.parseInt(intent.getStringExtra(PedidosColumns.PEDIDOS_PRAZOPAGAMENTO));
+        final String iId                 = intent.getStringExtra(PedidosColumns.PEDIDOS_ID);
+        final String iTipoPedido         = intent.getStringExtra(PedidosColumns.PEDIDOS_TIPO_PEDIDO);
+        final int    iCodigoCliente      = intent.getIntExtra(PedidosColumns.PEDIDOS_CODIGOCLIENTE, 0);
+        final String iRazaoSocialCliente = intent.getStringExtra(ClientesColumns.CLIENTES_RAZAO_SOCIAL);
+        final int iFormaPagamento        = intent.getIntExtra(PedidosColumns.PEDIDOS_FORMAPAGAMENTO, 0);
+        final int iPrazoPagamento        = intent.getIntExtra(PedidosColumns.PEDIDOS_PRAZOPAGAMENTO, 0);
 
+        mNumeroPedido.setText(iId);
+        mCodigoFormaPagamento.setText(String.valueOf(iFormaPagamento));
+        mCodigoPrazoPagamento.setText(String.valueOf(iPrazoPagamento));
+        mCodigoCliente.setText(String.valueOf(iCodigoCliente));
+//        PegaNomeCliente pegaNomeCliente = new PegaNomeCliente(iCodigoCliente, codigoEmpresa);
+        //String razaoSocial = pegaNomeCliente.pegaRazaoSocial();
+        //mNomeCliente.setText(razaoSocial);
 
-        if (iCodigoCliente != null) {
-            mCodigoCliente.setText(iCodigoCliente);
-            mNomeCliente.setText(iRazaoSocialCliente);
-        }
         // FIM - Pega as informaçoes do Corpo do Pedido
 
 
@@ -198,6 +220,22 @@ public class EditPedidoItensActivity extends Activity
                 }
             }
         });
+
+
+
+        // TodoDatabaseHandler is a SQLiteOpenHelper class connecting to SQLite
+        UsesalesDatabase handler = new UsesalesDatabase(this);
+        // Get access to the underlying writeable database
+        SQLiteDatabase db = handler.getWritableDatabase();
+        // Query for items from the database and get a cursor back
+        Cursor todoCursor = db.rawQuery("SELECT  * FROM PEDIDOSITENS WHERE numeroPedido = "+iId, null);
+
+        // Find ListView to populate
+        ListView lvItems = (ListView) findViewById(R.id.detail);
+        // Setup cursor adapter using cursor from last step
+        PedidoItemCursorAdapter pedidoItemCursorAdapter = new PedidoItemCursorAdapter(this, todoCursor, 0);
+        // Attach cursor adapter to the ListView
+        lvItems.setAdapter(pedidoItemCursorAdapter);
 
 
         btnAddItems = (Button) findViewById(R.id.addItemsButton);
@@ -831,6 +869,91 @@ public class EditPedidoItensActivity extends Activity
             return tQuantidade;
         }
     }
+
+    protected ArrayList<PedidosItensTemp> populatePedidoItemList() {
+
+        final MyGlobalVariables globalVariables = (MyGlobalVariables) getApplicationContext();
+        final int codigoEmpresa = globalVariables.getCodigoEmpresa();
+
+        String[] projection = {UsesalesContract.PedidosItensColumns.PEDIDOSITENS_CODIGO_PRODUTO,
+                UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PRECO_UNITARIO,
+                UsesalesContract.PedidosItensColumns.PEDIDOSITENS_QUANTIDADE,
+                UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PERCENTUAL_DESCONTO};
+
+        String selection = UsesalesContract.PedidosItensColumns.PEDIDOSITENS_ID_PEDIDO + " = " +
+                mNumeroPedido.getText().toString();
+
+        PedidosItensTemp itensBanco = new PedidosItensTemp();
+        ArrayList<PedidosItensTemp> itemList = new ArrayList<PedidosItensTemp>();
+
+        mCursor = mContentResolver.query(UsesalesContract.URI_TABLE_PEDIDOSITENS, projection,
+                selection, null, null);
+        if (mCursor != null) {
+            if (mCursor.moveToFirst()) {
+                do {
+                     codigoProdutoLV = mCursor.getString(mCursor.getColumnIndex(
+                            UsesalesContract.PedidosItensColumns.PEDIDOSITENS_CODIGO_PRODUTO));
+                     precoUnitarioLV = mCursor.getString(mCursor.getColumnIndex(
+                            UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PRECO_UNITARIO));
+                     quantidadeLV = mCursor.getString(mCursor.getColumnIndex(
+                            UsesalesContract.PedidosItensColumns.PEDIDOSITENS_QUANTIDADE));
+                     descontoLV = mCursor.getString(mCursor.getColumnIndex(
+                            UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PERCENTUAL_DESCONTO));
+
+                    itensBanco.setCodigoProduto(codigoProdutoLV);
+                    itensBanco.setPrecoUnitario(precoUnitarioLV);
+                    itensBanco.setQuantidade(quantidadeLV);
+                    itensBanco.setPercentualDesconto(descontoLV);
+
+                    itemList.add(itensBanco);
+
+                } while (mCursor.moveToNext());
+
+            } else {
+                // TODO
+            }
+        }
+        return itemList;
+    }
+
+    public class PedidoItemCursorAdapter extends CursorAdapter {
+
+        public PedidoItemCursorAdapter(Context context, Cursor cursor, int flags) {
+            super(context, cursor, 0);
+        }
+
+        // The newView method is used to inflate a new view and return it,
+        // you don't bind any data to the view at this point.
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            return LayoutInflater.from(context).inflate(R.layout.pedidositensrow, parent, false);
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            // Find fields to populate in inflated template
+            codigoProdutoRow = (TextView) view.findViewById(R.id.tvCodigoProdutoRow);
+            precoUnitarioRow = (TextView) view.findViewById(R.id.tvPrecoUnitarioRow);
+            quantidadeRow    = (TextView) view.findViewById(R.id.tvQuantidadeRow);
+            descontoRow      = (TextView) view.findViewById(R.id.tvDescontoRow);
+            // Extract properties from cursor
+            codigoProdutoLV = mCursor.getString(mCursor.getColumnIndex(
+                    UsesalesContract.PedidosItensColumns.PEDIDOSITENS_CODIGO_PRODUTO));
+            precoUnitarioLV = mCursor.getString(mCursor.getColumnIndex(
+                    UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PRECO_UNITARIO));
+            quantidadeLV = mCursor.getString(mCursor.getColumnIndex(
+                    UsesalesContract.PedidosItensColumns.PEDIDOSITENS_QUANTIDADE));
+            descontoLV = mCursor.getString(mCursor.getColumnIndex(
+                    UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PERCENTUAL_DESCONTO));
+            // Populate fields with extracted properties
+            codigoProdutoRow.setText(codigoProdutoLV);
+            precoUnitarioRow.setText(String.valueOf(precoUnitarioLV));
+            quantidadeRow.setText(quantidadeLV);
+            descontoRow.setText(String.valueOf(descontoLV));
+
+        }
+    }
+
 
 
 }

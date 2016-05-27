@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+    <include layout="@layout/header" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <RadioGroup
+        android:id="@+id/tipoPedido_rg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:checkedButton="@+id/radio0"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radio0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Pedido"/>
+
+        <RadioButton
+            android:id="@+id/radio1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pré-Pedido"/>
+
+    </RadioGroup>
+        <TextView
+            android:paddingLeft="10dp"
+            android:id="@+id/labelNumeroPedido_tv"
+            android:text="Número: "
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/numeroPedido_tv"
+            android:hint="Número"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!--Cabeçalho de CLIENTE-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/labelCodigoCliente"
+            android:layout_width="87dp"
+            android:layout_height="wrap_content"
+            android:text="Código"/>
+
+
+        <TextView
+            android:id="@+id/labelNomeCliente"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nome do Cliente"/>
+    </LinearLayout>
+    <!--FIM Cabeçalho de CLIENTE-->
+
+    <!--Campos de CLIENTE-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/codigoCliente_tv"
+            android:layout_width="87dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="7" />
+
+        <AutoCompleteTextView
+            android:id="@+id/nomeCliente_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <!--FIM Campos de CLIENTE-->
+
+    <!--Cabeçalho de FORMA DE PAGAMENTO-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/labelFormaPagamento"
+            android:layout_width="87dp"
+            android:layout_height="wrap_content"
+            android:text="Código"/>
+
+        <TextView
+            android:id="@+id/labelDescricaoFormaPagamento"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Descrição da Forma de Pagamento"/>
+    </LinearLayout>
+    <!-- FIM Cabeçalho de FORMA DE PAGAMENTO-->
+
+    <!--Campos de FORMA DE PAGAMENTO-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/codigoFormaPagamento_tv"
+            android:layout_width="87dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="2" />
+
+        <AutoCompleteTextView
+            android:id="@+id/formaPagamento_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <!--FIM Campos de FORMA DE PAGAMENTO-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/labelPrazoPagamento"
+            android:layout_width="87dp"
+            android:layout_height="wrap_content"
+            android:text="Código"/>
+
+        <TextView
+            android:id="@+id/labelDescricaoPrazoPagamento"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Descriçao do Prazo de Pagamento"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/codigoPrazoPagamento_tv"
+            android:layout_width="87dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="3" />
+
+        <AutoCompleteTextView
+            android:id="@+id/prazoPagamento_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</LinearLayout>
