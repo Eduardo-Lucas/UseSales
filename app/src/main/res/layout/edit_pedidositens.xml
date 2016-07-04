@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
@@ -156,6 +156,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
+            android:gravity="right"
             android:hint="Quantidade"/>
 
         <TextView
@@ -163,14 +164,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
+            android:gravity="right"
             android:hint="Preço Unitário"/>
 
-        <TextView
+        <!-- <TextView
             android:id="@+id/labelPercentualDesconto"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:hint="% Desconto"/>
+            android:hint="% Desconto"/> -->
     </LinearLayout>
     <!-- FIM CAMPOS LABEL DE QUANTIDADE-PRECO-DESCONTO -->
 
@@ -201,26 +203,47 @@
             android:gravity="right"
             android:inputType="numberDecimal"/>
 
-        <EditText
-            android:id="@+id/percentualDesconto_tv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:digits="0123456789-."
-            android:gravity="right"
-            android:inputType="numberDecimal"/>
+        <!-- <EditText
+             android:id="@+id/percentualDesconto_tv"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="2"
+             android:digits="0123456789-."
+             android:gravity="right"
+             android:inputType="numberDecimal"/> -->
     </LinearLayout>
     <!-- FIM CAMPOS EDITAVEIS DE QUANTIDADE-PRECO-DESCONTO -->
 
-    <Button
-        android:id="@+id/addItemsButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:gravity="center"
-        android:text="Adiciona Itens no Pedido"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="3">
 
-    <ListView
+            <Button
+                android:id="@+id/addItemsButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:adjustViewBounds="true"
+                android:drawableTop="@drawable/additenspedido"
+                android:scaleType="fitCenter"
+                android:text="Adiciona Itens no Pedido" />
+
+            <Button
+                android:id="@+id/fechaPedidoButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:layout_weight="1"
+                android:adjustViewBounds="true"
+                android:drawableTop="@drawable/salv1"
+                android:scaleType="fitCenter"
+                android:text="Fecha Pedido" />
+        </LinearLayout>
+
+        <ListView
         android:id="@+id/detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -229,14 +252,6 @@
 
     </ListView>
 
-    <Button
-        android:id="@+id/fechaPedidoButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawableBottom="@drawable/salv1"
-        android:gravity="center"
-        android:text="Fecha Pedido"/>
 
-
-</LinearLayout>
+    </LinearLayout>
 </ScrollView>

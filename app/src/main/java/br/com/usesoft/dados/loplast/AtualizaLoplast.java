@@ -27,6 +27,8 @@ public class AtualizaLoplast {
     }
 
     public void InsereClientes() {
+        Juliene0030 juliene = new Juliene0030(db);
+        juliene.InsereCliente();
         Heron0029 heron = new Heron0029(db);
         heron.InsereCliente();
         Isamara0070 isamara = new Isamara0070(db);
@@ -51,6 +53,12 @@ public class AtualizaLoplast {
         marcos.InsereCliente();
         George0760 george = new George0760(db);
         george.InsereCliente();
+        Plinio0023 plinio = new Plinio0023(db);
+        plinio.InsereCliente();
+        Manoel0110 manoel = new Manoel0110(db);
+        manoel.InsereCliente();
+        Cidiony0330 cidiony = new Cidiony0330(db);
+        cidiony.InsereCliente();
     }
 
     public void InsereFormasPagamento() {

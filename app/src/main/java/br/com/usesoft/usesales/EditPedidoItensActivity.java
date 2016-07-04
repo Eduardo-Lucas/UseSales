@@ -5,29 +5,24 @@ import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.FilterQueryProvider;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -69,17 +64,7 @@ public class EditPedidoItensActivity extends Activity
     private BigDecimal precoFinalAcumulado = BigDecimal.valueOf(0.00);
     private int quantidadeItens = 0;
     // Campos Globais
-    private TextView mCodigoEmpresa, mNomeEmpresa, mCodigoUsuario, mNomeUsuario, mCodigoCliente,
-            mNomeCliente, mNumeroPedido;
-
-    // Campos do CursorAdapter
-    private TextView codigoProdutoRow, precoUnitarioRow, quantidadeRow, descontoRow;
-    // Campos do ListView
-    String codigoProdutoLV , precoUnitarioLV, quantidadeLV, descontoLV;
-    // Campos do Pedido
-    private TextView mCodigoFormaPagamento, mDescricaoFormaPagamento, mCodigoPrazoPagamento,
-            mDescricaoPrazoPagamento;
-
+    private TextView mCodigoEmpresa, mNomeEmpresa, mCodigoUsuario, mNomeUsuario, mCodigoCliente, mNomeCliente;
     // Campos AutoComplete
     // O campo nomeCliente deixou de ser AutoComplete pois, com o codigo informado, aparece o nome.
     private SimpleCursorAdapter mAdapter0; // (AutoCompleteTextView) Produtod
@@ -88,7 +73,7 @@ public class EditPedidoItensActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.edit_pedidositens);
+        setContentView(R.layout.add_edit_pedidositens);
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
@@ -116,6 +101,7 @@ public class EditPedidoItensActivity extends Activity
         final int codigoUsuario = globalVariables.getUsuario_id();
         final String nomeUsuario = globalVariables.getNomeUsuario();
 
+
         mCodigoEmpresa = (TextView) findViewById(R.id.codigoEmpresa_tv);
         mNomeEmpresa = (TextView) findViewById(R.id.nomeEmpresa_tv);
         mCodigoUsuario = (TextView) findViewById(R.id.codigoRepresentante_tv);
@@ -125,10 +111,6 @@ public class EditPedidoItensActivity extends Activity
         mValorTotalPedido = (TextView) findViewById(R.id.valorTotalPedido_tv);
         mquantidadeItens = (TextView) findViewById(R.id.quantidadeItens_tv);
         mEstoqueProduto = (TextView) findViewById(R.id.estoqueProduto_tv);
-
-        mNumeroPedido = (TextView)findViewById(R.id.numeroPedido_tv);
-        mCodigoFormaPagamento = (TextView) findViewById(R.id.codigoFormaPagamento_tv);
-        mCodigoPrazoPagamento = (TextView) findViewById(R.id.codigoPrazoPagamento_tv);
 
         mCodigoEmpresa.setText(String.valueOf(codigoEmpresa));
         mNomeEmpresa.setText(nomeEmpresa);
@@ -143,21 +125,18 @@ public class EditPedidoItensActivity extends Activity
 
         // INÍCIO - Pega as informaçoes do Corpo do Pedido
         Intent intent = getIntent();
-        final String iId                 = intent.getStringExtra(PedidosColumns.PEDIDOS_ID);
-        final String iTipoPedido         = intent.getStringExtra(PedidosColumns.PEDIDOS_TIPO_PEDIDO);
-        final int    iCodigoCliente      = intent.getIntExtra(PedidosColumns.PEDIDOS_CODIGOCLIENTE, 0);
-        final String iRazaoSocialCliente = intent.getStringExtra(ClientesColumns.CLIENTES_RAZAO_SOCIAL);
-        final int iFormaPagamento        = intent.getIntExtra(PedidosColumns.PEDIDOS_FORMAPAGAMENTO, 0);
-        final int iPrazoPagamento        = intent.getIntExtra(PedidosColumns.PEDIDOS_PRAZOPAGAMENTO, 0);
+        final String iTipoPedido = intent.getStringExtra(PedidosColumns.PEDIDOS_TIPO_PEDIDO);
+        final String iCodigoCliente = intent.getStringExtra(ClientesColumns.CLIENTES_CODIGO);
+        String iRazaoSocialCliente = intent.getStringExtra(ClientesColumns.CLIENTES_RAZAO_SOCIAL);
+        final String iObservacao = intent.getStringExtra(PedidosColumns.PEDIDOS_OBSERVACAO);
+        final int iFormaPagamento = Integer.parseInt(intent.getStringExtra(PedidosColumns.PEDIDOS_FORMAPAGAMENTO));
+        final int iPrazoPagamento = Integer.parseInt(intent.getStringExtra(PedidosColumns.PEDIDOS_PRAZOPAGAMENTO));
 
-        mNumeroPedido.setText(iId);
-        mCodigoFormaPagamento.setText(String.valueOf(iFormaPagamento));
-        mCodigoPrazoPagamento.setText(String.valueOf(iPrazoPagamento));
-        mCodigoCliente.setText(String.valueOf(iCodigoCliente));
-//        PegaNomeCliente pegaNomeCliente = new PegaNomeCliente(iCodigoCliente, codigoEmpresa);
-        //String razaoSocial = pegaNomeCliente.pegaRazaoSocial();
-        //mNomeCliente.setText(razaoSocial);
 
+        if (iCodigoCliente != null) {
+            mCodigoCliente.setText(iCodigoCliente);
+            mNomeCliente.setText(iRazaoSocialCliente);
+        }
         // FIM - Pega as informaçoes do Corpo do Pedido
 
 
@@ -171,6 +150,7 @@ public class EditPedidoItensActivity extends Activity
                 return false;
             }
         });
+
 
         mContentResolver = EditPedidoItensActivity.this.getContentResolver();
 
@@ -198,44 +178,39 @@ public class EditPedidoItensActivity extends Activity
 
         SetNomeProduto();     // AutoCompleteTextView
 
+        // LISTA O CONTEUDO DA TABELA DE PRODUTOS
+        mNomeProduto.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mNomeProduto.setText("%");
+                return false;
+            }
+        });
+
 
         btnPesquisaCampos = (Button) findViewById(R.id.search);
         btnPesquisaCampos.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mDescricaoProduto != null) {
-
-                    mCodigoProduto.setText(pegaCodigoProduto());
-                    mEstoqueProduto.setText(pegaEstoqueProduto());
-                    int novoEstoque = Integer.parseInt(mEstoqueProduto.getText().toString());
-                    if (novoEstoque <= 0) {
-                        mEstoqueProduto.setTextColor(Color.RED);
+                    String codigoProduto = pegaCodigoProduto();
+                    if (codigoProduto != null) {
+                        mCodigoProduto.setText(pegaCodigoProduto());
+                        mEstoqueProduto.setText(pegaEstoqueProduto());
+                        int novoEstoque = Integer.parseInt(mEstoqueProduto.getText().toString());
+                        if (novoEstoque <= 0) {
+                            mEstoqueProduto.setTextColor(Color.RED);
+                        } else {
+                            mEstoqueProduto.setTextColor(Color.GREEN);
+                        }
+                        mPrecoUnitario.setText(pegaPrecoProduto());
                     } else {
-                        mEstoqueProduto.setTextColor(Color.GREEN);
+                        Toast.makeText(EditPedidoItensActivity.this, "Escolha uma descriçao da " +
+                                "Lista de Produtos", Toast.LENGTH_SHORT).show();
                     }
-                    mPrecoUnitario.setText(pegaPrecoProduto());
-                } else {
-                    Toast.makeText(EditPedidoItensActivity.this, "Entre com uma descriçao de " +
-                            "Produto válida para fazer a pesquisa", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
-
-
-        // TodoDatabaseHandler is a SQLiteOpenHelper class connecting to SQLite
-        UsesalesDatabase handler = new UsesalesDatabase(this);
-        // Get access to the underlying writeable database
-        SQLiteDatabase db = handler.getWritableDatabase();
-        // Query for items from the database and get a cursor back
-        Cursor todoCursor = db.rawQuery("SELECT  * FROM PEDIDOSITENS WHERE numeroPedido = "+iId, null);
-
-        // Find ListView to populate
-        ListView lvItems = (ListView) findViewById(R.id.detail);
-        // Setup cursor adapter using cursor from last step
-        PedidoItemCursorAdapter pedidoItemCursorAdapter = new PedidoItemCursorAdapter(this, todoCursor, 0);
-        // Attach cursor adapter to the ListView
-        lvItems.setAdapter(pedidoItemCursorAdapter);
 
 
         btnAddItems = (Button) findViewById(R.id.addItemsButton);
@@ -247,7 +222,7 @@ public class EditPedidoItensActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                if (validaCodigoProduto() || validaDescricaoProduto()) {
+                //if (validaCodigoProduto() || validaDescricaoProduto()) {
 
                     if (isValid()) {
                         if (ProdutoJaInformado(mCodigoProduto.getText().toString())) {
@@ -255,9 +230,14 @@ public class EditPedidoItensActivity extends Activity
                             Toast.makeText(getApplicationContext(), "O Produto " + mCodigoProduto
                                     .getText().toString() + " " + "já foi adicionado" +
                                     ".", Toast.LENGTH_LONG).show();
+                            mCodigoProduto.setText("");
+                            mQuantidade.setText("");
 
                         } else {
                             // Volta os campos para ter . no lugar da ,
+
+                            // CAMPO DE DESCONTO DESABILITADO TEMPORARIAMENTE
+                            /*
                             String percentualDesconto = null;
                             if (mPercentualDesconto.getText().toString().length() == 0 ||
                                     mPercentualDesconto.getText().toString() == null) {
@@ -266,6 +246,9 @@ public class EditPedidoItensActivity extends Activity
 
                             percentualDesconto = mPercentualDesconto.getText().toString();
                             percentualDesconto = percentualDesconto.replace(",", ".");
+                            */
+
+                            String percentualDesconto = "0";
 
                             String preco = mPrecoUnitario.getText().toString();
                             preco = preco.replace(",", ".");
@@ -312,7 +295,7 @@ public class EditPedidoItensActivity extends Activity
                             PedidosItensTemp newDetail =
                                     new PedidosItensTemp(mCodigoProduto.getText().toString(), mNomeProduto
                                             .getText().toString(), mQuantidade.getText().toString(),
-                                            precoUnitario, mPercentualDesconto.getText().toString());
+                                            precoUnitario, percentualDesconto); //mPercentualDesconto.getText().toString());
                             // add new item to arraylist
                             itemList.add(newDetail);
                             // notify listview of data changed
@@ -321,14 +304,14 @@ public class EditPedidoItensActivity extends Activity
 
                             // Limpa os campos
                             mCodigoProduto.setText("");
-                            mPercentualDesconto.setText("");
+//                            mPercentualDesconto.setText("");
                             mPrecoUnitario.setText("");
                             mQuantidade.setText("");
 
                             mCodigoProduto.requestFocus();
                         }
                     }
-                }
+                // }
             }
         });
 
@@ -338,6 +321,7 @@ public class EditPedidoItensActivity extends Activity
             public void onClick(View v) {
 
                 if (possuiItens()) {
+
 
                     // Adicionando PEDIDO
                     ContentValues valuesp = new ContentValues();
@@ -358,6 +342,7 @@ public class EditPedidoItensActivity extends Activity
                     valuesp.put(PedidosColumns.PEDIDOS_VALORTOTAL, String.valueOf(precoFinalAcumulado));
                     valuesp.put(PedidosColumns.PEDIDOS_ORIGEM, "T");
                     valuesp.put(PedidosColumns.PEDIDOS_STATUS, "cadastrado");
+                    valuesp.put(PedidosColumns.PEDIDOS_OBSERVACAO, iObservacao);
                     Uri returnedp = mContentResolver.insert(UsesalesContract.URI_TABLE_PEDIDOS, valuesp);
 
 
@@ -431,6 +416,11 @@ public class EditPedidoItensActivity extends Activity
                 }
 
                 mPrecoUnitario.setText(pegaPrecoProduto());
+                if (mPrecoUnitario.getText().toString().length() == 0 ||
+                        mPrecoUnitario.getText().toString() == null) {
+                    Toast.makeText(getApplicationContext(), "Preço do Produto não foi informado!", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
             }
 
 
@@ -512,6 +502,7 @@ public class EditPedidoItensActivity extends Activity
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         //Dont care
 
+
     }
 
     public String pegaNomeProduto() {
@@ -546,7 +537,7 @@ public class EditPedidoItensActivity extends Activity
                         precoProduto = precoProduto.replace(".", ",");
                         mPrecoUnitario.setText(precoProduto);
                         btnAddItems.setEnabled(true);
-                        mQuantidade.requestFocus();
+                        //mQuantidade.requestFocus();
                         break;
                     }
                 } while (mCursor.moveToNext());
@@ -713,6 +704,9 @@ public class EditPedidoItensActivity extends Activity
                                 ProdutosColumns.PRODUTOS_CODIGO));
 
                         break;
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Essa Descrição NÃO EXISTE!",
+                                Toast.LENGTH_LONG).show();
                     }
                 } while (mCursor.moveToNext());
 
@@ -869,91 +863,6 @@ public class EditPedidoItensActivity extends Activity
             return tQuantidade;
         }
     }
-
-    protected ArrayList<PedidosItensTemp> populatePedidoItemList() {
-
-        final MyGlobalVariables globalVariables = (MyGlobalVariables) getApplicationContext();
-        final int codigoEmpresa = globalVariables.getCodigoEmpresa();
-
-        String[] projection = {UsesalesContract.PedidosItensColumns.PEDIDOSITENS_CODIGO_PRODUTO,
-                UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PRECO_UNITARIO,
-                UsesalesContract.PedidosItensColumns.PEDIDOSITENS_QUANTIDADE,
-                UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PERCENTUAL_DESCONTO};
-
-        String selection = UsesalesContract.PedidosItensColumns.PEDIDOSITENS_ID_PEDIDO + " = " +
-                mNumeroPedido.getText().toString();
-
-        PedidosItensTemp itensBanco = new PedidosItensTemp();
-        ArrayList<PedidosItensTemp> itemList = new ArrayList<PedidosItensTemp>();
-
-        mCursor = mContentResolver.query(UsesalesContract.URI_TABLE_PEDIDOSITENS, projection,
-                selection, null, null);
-        if (mCursor != null) {
-            if (mCursor.moveToFirst()) {
-                do {
-                     codigoProdutoLV = mCursor.getString(mCursor.getColumnIndex(
-                            UsesalesContract.PedidosItensColumns.PEDIDOSITENS_CODIGO_PRODUTO));
-                     precoUnitarioLV = mCursor.getString(mCursor.getColumnIndex(
-                            UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PRECO_UNITARIO));
-                     quantidadeLV = mCursor.getString(mCursor.getColumnIndex(
-                            UsesalesContract.PedidosItensColumns.PEDIDOSITENS_QUANTIDADE));
-                     descontoLV = mCursor.getString(mCursor.getColumnIndex(
-                            UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PERCENTUAL_DESCONTO));
-
-                    itensBanco.setCodigoProduto(codigoProdutoLV);
-                    itensBanco.setPrecoUnitario(precoUnitarioLV);
-                    itensBanco.setQuantidade(quantidadeLV);
-                    itensBanco.setPercentualDesconto(descontoLV);
-
-                    itemList.add(itensBanco);
-
-                } while (mCursor.moveToNext());
-
-            } else {
-                // TODO
-            }
-        }
-        return itemList;
-    }
-
-    public class PedidoItemCursorAdapter extends CursorAdapter {
-
-        public PedidoItemCursorAdapter(Context context, Cursor cursor, int flags) {
-            super(context, cursor, 0);
-        }
-
-        // The newView method is used to inflate a new view and return it,
-        // you don't bind any data to the view at this point.
-        @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            return LayoutInflater.from(context).inflate(R.layout.pedidositensrow, parent, false);
-        }
-
-        @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-            // Find fields to populate in inflated template
-            codigoProdutoRow = (TextView) view.findViewById(R.id.tvCodigoProdutoRow);
-            precoUnitarioRow = (TextView) view.findViewById(R.id.tvPrecoUnitarioRow);
-            quantidadeRow    = (TextView) view.findViewById(R.id.tvQuantidadeRow);
-            descontoRow      = (TextView) view.findViewById(R.id.tvDescontoRow);
-            // Extract properties from cursor
-            codigoProdutoLV = mCursor.getString(mCursor.getColumnIndex(
-                    UsesalesContract.PedidosItensColumns.PEDIDOSITENS_CODIGO_PRODUTO));
-            precoUnitarioLV = mCursor.getString(mCursor.getColumnIndex(
-                    UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PRECO_UNITARIO));
-            quantidadeLV = mCursor.getString(mCursor.getColumnIndex(
-                    UsesalesContract.PedidosItensColumns.PEDIDOSITENS_QUANTIDADE));
-            descontoLV = mCursor.getString(mCursor.getColumnIndex(
-                    UsesalesContract.PedidosItensColumns.PEDIDOSITENS_PERCENTUAL_DESCONTO));
-            // Populate fields with extracted properties
-            codigoProdutoRow.setText(codigoProdutoLV);
-            precoUnitarioRow.setText(String.valueOf(precoUnitarioLV));
-            quantidadeRow.setText(quantidadeLV);
-            descontoRow.setText(String.valueOf(descontoLV));
-
-        }
-    }
-
 
 
 }
