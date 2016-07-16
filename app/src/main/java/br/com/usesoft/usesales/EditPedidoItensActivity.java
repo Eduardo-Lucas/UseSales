@@ -121,7 +121,7 @@ public class EditPedidoItensActivity extends Activity
         mNomeProduto = (TextView) findViewById(R.id.nomeProduto_tv);
         mQuantidade = (TextView) findViewById(R.id.quantidade_tv);
         mPrecoUnitario = (TextView) findViewById(R.id.precoUnitario_tv);
-        mPercentualDesconto = (TextView) findViewById(R.id.percentualDesconto_tv);
+        //mPercentualDesconto = (TextView) findViewById(R.id.percentualDesconto_tv);
 
         // INÍCIO - Pega as informaçoes do Corpo do Pedido
         Intent intent = getIntent();

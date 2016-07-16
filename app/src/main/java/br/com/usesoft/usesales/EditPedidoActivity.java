@@ -81,6 +81,8 @@ public class EditPedidoActivity extends FragmentActivity
         setContentView(R.layout.add_edit_pedidos);
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
+        mContentResolver = EditPedidoActivity.this.getContentResolver();
+
 
         final MyGlobalVariables globalVariables = (MyGlobalVariables) getApplicationContext();
         final int codigoEmpresa = globalVariables.getCodigoEmpresa();
@@ -107,9 +109,19 @@ public class EditPedidoActivity extends FragmentActivity
         mContador.setText(Integer.toString(MAX_COUNT));
 
         Intent intent = getIntent();
-        String iCodigoCliente = intent.getStringExtra(UsesalesContract.Pedidos.PEDIDOS_CODIGOCLIENTE);
-        String iCodigoFormaPagamento = intent.getStringExtra(UsesalesContract.Pedidos.PEDIDOS_FORMAPAGAMENTO);
-        String iCodigoPrazoPagamento = intent.getStringExtra(UsesalesContract.Pedidos.PEDIDOS_PRAZOPAGAMENTO);
+        int iCodigoCliente = intent.getIntExtra(UsesalesContract.Pedidos.PEDIDOS_CODIGOCLIENTE, 0);
+        int iCodigoFormaPagamento = intent.getIntExtra(UsesalesContract.Pedidos.PEDIDOS_FORMAPAGAMENTO, 0);
+        int iCodigoPrazoPagamento = intent.getIntExtra(UsesalesContract.Pedidos.PEDIDOS_PRAZOPAGAMENTO, 0);
+        String iObservacao = intent.getStringExtra(UsesalesContract.Pedidos.PEDIDOS_OBSERVACAO);
+
+        mCodigoCliente.setText(String.valueOf(iCodigoCliente));
+        mCodigoFormaDePagamento.setText(String.valueOf(iCodigoFormaPagamento));
+        mCodigoPrazoDePagamento.setText(String.valueOf(iCodigoPrazoPagamento));
+        mObservacao.setText(iObservacao);
+
+        btnAddItems = (Button) findViewById(R.id.btnAdicionarItens);
+
+        btnAddItems.performClick();
 
         // Attached Listener to Edit Text Widget
         mObservacao.addTextChangedListener(new TextWatcher() {
@@ -347,8 +359,6 @@ public class EditPedidoActivity extends FragmentActivity
             }
         });
 
-
-        mContentResolver = EditPedidoActivity.this.getContentResolver();
 
         btnAddItems = (Button) findViewById(R.id.btnAdicionarItens);
 
@@ -623,7 +633,8 @@ public class EditPedidoActivity extends FragmentActivity
 
         String selection = ClientesColumns.CLIENTES_CODIGO_EMPRESA + " = " +
                 codigoEmpresa + " AND " + ClientesColumns.CLIENTES_CODIGO +
-                " LIKE '" + mCodigoCliente.getText().toString() + "%'" +
+                " = " + mCodigoCliente.getText().toString() +
+//                " LIKE '" + mCodigoCliente.getText().toString() + "%'" +
                 " AND " + ClientesColumns.CLIENTES_VENDEDOR + " = " + usuarioId;
 
         String codigoCliente = null;

@@ -59,6 +59,10 @@ public class AtualizaLoplast {
         manoel.InsereCliente();
         Cidiony0330 cidiony = new Cidiony0330(db);
         cidiony.InsereCliente();
+        Dinoelho0031 dinoelho = new Dinoelho0031(db);
+        dinoelho.InsereCliente();
+        Sousa0410 sousa = new Sousa0410(db);
+        sousa.InsereCliente();
     }
 
     public void InsereFormasPagamento() {

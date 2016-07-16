@@ -17,6 +17,8 @@ public class UsuariosLoplast {
 
     public void InsereUsuario() {
         Log.d(TAG, "Inserindo Usuarios...");
+        db.execSQL("insert into USUARIOS (_id, nome_completo, email,  password, codigoempresa, codigo) values (null, 'DINOELHO ROCHA', 'dinoelhorocha2@gmail.com', 'd', 544, 31)");
+        db.execSQL("insert into USUARIOS (_id, nome_completo, email,  password, codigoempresa, codigo) values (null, 'JOSE SOUSA DE OLIVEIRA', 'sousaloplast@gmail.com', 'S', 544, 410)");
         db.execSQL("insert into USUARIOS (_id, nome_completo, email,  password, codigoempresa, codigo) values (null, 'JULIIENE BATISTA SOUZA', 'julienebs@hotmail.com', 'J', 544, 30)");
         db.execSQL("insert into USUARIOS (_id, nome_completo, email,  password, codigoempresa, codigo) values (null, 'ROSALINA', 'rosa.vendasjg@gmail.com', 'R', 544, 480)");
         db.execSQL("insert into USUARIOS (_id, nome_completo, email,  password, codigoempresa, codigo) values (null, 'HERON PASSOS', 'heronpassosalianca@hotmail.com', 'HERON', 544, 29)");
